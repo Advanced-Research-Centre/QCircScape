@@ -1,0 +1,2 @@
+# AIG
+Algorithmic Information Geometry
