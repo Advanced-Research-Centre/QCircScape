@@ -95,7 +95,8 @@ def runQprog(size_of_aritra, prog_desc, list_init_circ):
     for desc in prog_desc:
         for init_no, init in enumerate(list_init_circ):
             qcirc = QuantumCircuit(size_of_aritra)
-            qcirc.compose(init)
+            # print(init)
+            qcirc = qcirc.compose(init)
             qcirc.barrier()
             i = 0
             while (i < len(desc)):
@@ -103,7 +104,7 @@ def runQprog(size_of_aritra, prog_desc, list_init_circ):
                     qcirc.u1(pi/4, int(desc[i+1]))
                     i+= 2
                 elif desc[i]=='1':
-                    qcirc.rx(pi/2, int(desc[i+1]))
+                    qcirc.rx(pi, int(desc[i+1]))
                     i+= 2
                 elif desc[i]=='2':
                     qcirc.cx(int(desc[i+1]),int(desc[i+2]))
@@ -115,16 +116,17 @@ def runQprog(size_of_aritra, prog_desc, list_init_circ):
             for j in range(0,len(memory)):
                 if memory[j] > 0:
                     AP[init_no][j] += memory[j]
+            # print(qcirc)
     return AP
 
 
 if __name__ == "__main__":
     backend = Aer.get_backend('statevector_simulator')
-    size_of_aritra = 4
+    size_of_aritra = 3
     aritra_da_bhibhajito = list(range(0,size_of_aritra))
     gs = ['u1(pi/4)', 'rx(pi/4)', 'cx']
     gs_opcode = ['0', '1', '2']
-    gc = 1
+    gc = 3
     
     setU1 = one_qubit_choice(aritra_da_bhibhajito, gs_opcode[0])
     setRX = one_qubit_choice(aritra_da_bhibhajito, gs_opcode[1])
@@ -138,9 +140,7 @@ if __name__ == "__main__":
     circ = QuantumCircuit(4)
     list_init_circ = aritra_dar_initialization(possible_states, size_of_aritra)
     final_mat = runQprog(size_of_aritra, program_description, list_init_circ)
-    # print(program_description)
-    # print(len(list_init_circ))
-    print(final_mat)
+    np.save(f'data/info_qubit-{size_of_aritra}_prog_length-{gc}', final_mat)
 
 
 """
