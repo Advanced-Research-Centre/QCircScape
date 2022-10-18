@@ -2,9 +2,17 @@ import copy
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+from matplotlib import rcParams
+import matplotlib.font_manager as font_manager
 
-fig, axes = plt.subplots(1, 2, figsize=(15, 5), sharey=True)
-fig.suptitle('Matrices')
+
+plt.rcParams.update({
+    "text.usetex": True,
+    "font.family": "serif",
+    "font.size": 12,
+    'text.latex.preamble': r'\usepackage{amsfonts}'
+})
+# fig.suptitle('Matrices')
 
 def aritra_matrix(op_step, qubit):
     M1 = np.load(f'data/info_qubit-{qubit}_prog_length-1.npy')
@@ -46,40 +54,31 @@ if __name__ == "__main__":
     qubits = 3
     operations_length = 3
 
-    reach_mat = aritrar_boro_matrix(operations_length, qubits)
-    exp_mat = expressibility_of_aritra(reach_mat)
+    if qubits < 4:
+        xs, ys = 10, 10
+    else:
+        xs, ys = 3, 5
 
-    label = []
-    for num in range(2**qubits):
-        label.append(format(num, f'0{qubits}b'))
-        # label.append("{0:b}".format(num))
+    fig, axes = plt.subplots(operations_length, 2, figsize=(xs, ys), sharey=True, sharex=True)
 
-    sns.heatmap(exp_mat, ax=axes[0], xticklabels = label, yticklabels = label, cmap = 'Greens', vmin=0.0, vmax=1.0)
-    axes[1].set_title('Expressibility')
+    for op_length in range(1, operations_length+1):
+        reach_mat = aritrar_boro_matrix(op_length, qubits)
+        exp_mat = expressibility_of_aritra(reach_mat)
 
-    sns.heatmap(reach_mat, ax=axes[1], xticklabels = label, yticklabels = label, cmap = 'Greens', vmin=0.0, vmax=1.0) 
-    axes[0].set_title('Reachability')
+        label = []
 
-# sns.heatmap(reach_mat, cmap = 'Greens', vmin=0.0, vmax=1.0)
-# plt.savefig( 'plot/reachability_matrix.pdf')
-# plt.savefig( 'plot/reachability_matrix.png')
+        if qubits < 4:
+            for num in range(2**qubits):
+                label.append(format(num, f'0{qubits}b'))
+        
+        sns.heatmap(exp_mat, ax=axes[op_length-1][0], xticklabels = label, yticklabels = label, cmap = 'Greens', vmin=0.0, vmax=1.0, cbar = False)
+        sns.heatmap(reach_mat, ax=axes[op_length-1][1], xticklabels = label, yticklabels = label, cmap = 'Greens', vmin=0.0, vmax=1.0, cbar = False) 
 
-# sns.heatmap(exp_mat, cmap = 'Greens', vmin=0.0, vmax=1.0)
-# plt.savefig( 'plot/expressibility_matrix.pdf')
-# plt.savefig( 'plot/expressibility_matrix.png')
+    plt.tight_layout()
+    if qubits < 4:
+        axes[0][0].set_title('Expressibility')
+        axes[0][1].set_title('Reachability')
+    plt.savefig(f'plot/quantum_reach_and_expressibility_qubit_{qubits}.pdf')
+    plt.savefig(f'plot/quantum_reach_and_expressibility_qubit_{qubits}.png')
 
-        # xticklabels=qc1.columns,
-        # yticklabels=qc1.columns)
-plt.show()
-
-# l = []
-# for i in range(2**qubit):
-#     for j in range(2**3):
-#         if (qc1@qc1)[i][j] == qc2[i][j]:
-#             l.append(0)
-#         else:
-#             l.append(1)
-# if sum(l) == 0:
-#     print(' (prog_length-1 X prog_length-1) = prog_length-2')
-# else:
-#     print('no correlation')
+    plt.show()
