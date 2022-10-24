@@ -46,7 +46,6 @@ def one_qubit_choice(aritra_da_bhibhajito, gs_opcode):
     gs_opcode = choice of operation
     '''
     c = list(itertools.combinations(aritra_da_bhibhajito, 1))
-    print(c)
     allc = []
     for i in c:
         allc.append(gs_opcode+str(i[0]))
@@ -90,14 +89,14 @@ def program_generator(gc, setU1, setRX, setCX):
     return p
 
 
-def runQprog(size_of_aritra, prog_desc, list_init_circ):
+def runQprog(size_of_aritra, prog_desc, list_init_circ, list_edges):
     AP = np.zeros((2**size_of_aritra, 2**size_of_aritra))
     for desc in prog_desc:
         for init_no, init in enumerate(list_init_circ):
             qcirc = QuantumCircuit(size_of_aritra)
             # print(init)
             qcirc = qcirc.compose(init)
-            qcirc.barrier()
+            # qcirc.barrier()
             i = 0
             while (i < len(desc)):
                 if desc[i]=='0':
@@ -107,9 +106,12 @@ def runQprog(size_of_aritra, prog_desc, list_init_circ):
                     qcirc.rx(pi, int(desc[i+1]))
                     i+= 2
                 elif desc[i]=='2':
-                    qcirc.cx(int(desc[i+1]),int(desc[i+2]))
+                    x = (int(desc[i+1]),int(desc[i+2]))
+                    if x in list_edges or tuple(reversed(x)) in list_edges:
+                      qcirc.cx(int(desc[i+1]),int(desc[i+2]))
                     i+= 3
-            qcirc.barrier()
+            # qcirc.barrier()
+            # print(qcirc)
             job = execute(qcirc, backend, shots=1, memory=True)
             result = job.result()
             memory = Statevector(result.get_statevector(qcirc)).probabilities()
@@ -121,26 +123,38 @@ def runQprog(size_of_aritra, prog_desc, list_init_circ):
 
 
 if __name__ == "__main__":
-    backend = Aer.get_backend('statevector_simulator')
-    size_of_aritra = 3
-    aritra_da_bhibhajito = list(range(0,size_of_aritra))
-    gs = ['u1(pi/4)', 'rx(pi/4)', 'cx']
-    gs_opcode = ['0', '1', '2']
-    gc = 3
-    
-    setU1 = one_qubit_choice(aritra_da_bhibhajito, gs_opcode[0])
-    setRX = one_qubit_choice(aritra_da_bhibhajito, gs_opcode[1])
-    setCX = two_qubit_choice(aritra_da_bhibhajito, gs_opcode[2])
 
-    program_description = program_generator(gc, setU1, setRX, setCX)
+  device_topology = 't'
+  if device_topology == 't':
+    list_edges = [(0,1), (1,2), (1,3), (3,4)]
+  elif device_topology == 'l':
+    list_edges = [(0,1), (1,2), (2,3), (3,4)]
+  else:
+    device_topology = 'none'
+    list_edges = []
+  
 
-    possible_states = []
-    for i in range(0,2**size_of_aritra):
-        possible_states.append(format(i, f'0{size_of_aritra}b'))
-    circ = QuantumCircuit(4)
-    list_init_circ = aritra_dar_initialization(possible_states, size_of_aritra)
-    final_mat = runQprog(size_of_aritra, program_description, list_init_circ)
-    np.save(f'data/info_qubit-{size_of_aritra}_prog_length-{gc}', final_mat)
+
+  backend = Aer.get_backend('statevector_simulator')
+  size_of_aritra = 4
+  aritra_da_bhibhajito = list(range(0,size_of_aritra))
+  gs = ['u1(pi/4)', 'rx(pi/4)', 'cx']
+  gs_opcode = ['0', '1', '2']
+  gc = 1
+  
+  setU1 = one_qubit_choice(aritra_da_bhibhajito, gs_opcode[0])
+  setRX = one_qubit_choice(aritra_da_bhibhajito, gs_opcode[1])
+  setCX = two_qubit_choice(aritra_da_bhibhajito, gs_opcode[2])
+
+  program_description = program_generator(gc, setU1, setRX, setCX)
+
+  possible_states = []
+  for i in range(0,2**size_of_aritra):
+      possible_states.append(format(i, f'0{size_of_aritra}b'))
+  
+  list_init_circ = aritra_dar_initialization(possible_states, size_of_aritra)
+  final_mat = runQprog(size_of_aritra, program_description, list_init_circ, list_edges)
+  np.save(f'data/info_qubit-{size_of_aritra}_prog_length-{gc}_topology_{device_topology}', final_mat)
 
 
 """

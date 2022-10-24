@@ -14,19 +14,19 @@ plt.rcParams.update({
 })
 # fig.suptitle('Matrices')
 
-def aritra_matrix(op_step, qubit):
-    M1 = np.load(f'data/info_qubit-{qubit}_prog_length-1.npy')
+def aritra_matrix(op_step, qubit, device_topology):
+    M1 = np.load(f'data/info_qubit-{qubit}_prog_length-1_topology_{device_topology}.npy')
     M1 = np.divide(M1,sum(M1[0]))
     Mi = M1
     for _ in range(1,op_step):
         Mi = Mi@M1
     return Mi
 
-def aritrar_boro_matrix(op_step, qubit):
+def aritrar_boro_matrix(op_step, qubit, device_topology):
     """
     Reachability 
     """
-    M1 = np.load(f'data/info_qubit-{qubit}_prog_length-1.npy')
+    M1 = np.load(f'data/info_qubit-{qubit}_prog_length-1_topology_{device_topology}.npy')
     M1 = np.divide(M1,sum(M1[0]))
     m = 0.5*M1
     Mi = M1
@@ -51,8 +51,9 @@ def expressibility_of_aritra(reachibility_matrix):
 
 
 if __name__ == "__main__":
-    qubits = 3
-    operations_length = 3
+    qubits = 4
+    operations_length = 2
+    device_topology = 't'
 
     if qubits < 4:
         xs, ys = 10, 10
@@ -62,11 +63,10 @@ if __name__ == "__main__":
     fig, axes = plt.subplots(operations_length, 2, figsize=(xs, ys), sharey=True, sharex=True)
 
     for op_length in range(1, operations_length+1):
-        reach_mat = aritrar_boro_matrix(op_length, qubits)
+        reach_mat = aritrar_boro_matrix(op_length, qubits, device_topology)
         exp_mat = expressibility_of_aritra(reach_mat)
 
         label = []
-
         if qubits < 4:
             for num in range(2**qubits):
                 label.append(format(num, f'0{qubits}b'))
@@ -78,7 +78,7 @@ if __name__ == "__main__":
     if qubits < 4:
         axes[0][0].set_title('Expressibility')
         axes[0][1].set_title('Reachability')
-    plt.savefig(f'plot/quantum_reach_and_expressibility_qubit_{qubits}.pdf')
-    plt.savefig(f'plot/quantum_reach_and_expressibility_qubit_{qubits}.png')
+    plt.savefig(f'plot/quantum_reach_and_expressibility_qubit_{qubits}_topology_{device_topology}.pdf')
+    plt.savefig(f'plot/quantum_reach_and_expressibility_qubit_{qubits}_topology_{device_topology}.png')
 
     plt.show()
