@@ -7,10 +7,12 @@ import numpy as np
 
 # Global settings
 
-system_size = 2
-max_length = 2
-gateset = ['h','t','cx']
-gateqbts = {'h':1, 't':1, 'cx':2}
+system_size = 3
+max_length = 3
+# gateset = ['h','t','cx']
+# gateqbts = {'h':1, 't':1, 'cx':2}
+gateset = ['x','ccx']
+gateqbts = {'x':1, 'ccx':3}
 gateargs = {}
 gateperm = {}
 opcodes = 0   
@@ -87,7 +89,8 @@ if __name__ == "__main__":
     qasm_id = opcodes**max_length
     print("Total possible circuits of max length:",qasm_id)
 
-    init_circs = init_gen()        
+    init_circs = init_gen()     
+
     AP = np.zeros((2**system_size, 2**system_size))
 
     for icno, ic in enumerate(init_circs):
@@ -97,15 +100,19 @@ if __name__ == "__main__":
             qcirc = QuantumCircuit(system_size)
             qcirc.barrier()
             # Add Init circuit here
-            qcirc.compose(ic)
+            qcirc = qcirc.compose(ic)
             qcirc.barrier()
             for ins in qprog:
                 if ins[0] == 'h':
                     qcirc.h(ins[1])
                 elif ins[0] == 't':
                     qcirc.t(ins[1])
+                elif ins[0] == 'x':
+                    qcirc.x(ins[1])
                 elif ins[0] == 'cx':
                     qcirc.cx(ins[1][0],ins[1][1])
+                elif ins[0] == 'ccx':
+                    qcirc.ccx(ins[1][0],ins[1][1],ins[1][2])
                 qcirc.barrier()
             # print(qcirc.draw())
             job = execute(qcirc, backend, shots=1, memory=True)
@@ -115,7 +122,12 @@ if __name__ == "__main__":
             # exit()
             for j in range(0,len(memory)):
                 AP[icno][j] += memory[j]
-    
+
     print(AP)
+    gss = ''
+    for g in gateset:
+        gss += '-'+g
+    np.save(f'../data/info_Q-{system_size}_L-{max_length}_GS{gss}', AP)
+
         
 # ****************************************************************************************************************************************
