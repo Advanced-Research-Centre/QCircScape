@@ -3,8 +3,10 @@ from qiskit import *
 from qiskit.quantum_info import Statevector
 import numpy as np
 
+# ****************************************************************************************************************************************
+
 # Global settings
-# ========================================
+
 system_size = 2
 max_length = 2
 gateset = ['h','t','cx']
@@ -13,7 +15,8 @@ gateargs = {}
 gateperm = {}
 opcodes = 0   
 backend = Aer.get_backend('statevector_simulator')
-# ========================================
+
+# ****************************************************************************************************************************************
 
 def qasm_id_to_prog(id0):
     # id1 = Interpret id0 as a opcodes-digit number, of length max_length
@@ -43,6 +46,8 @@ def qasm_id_to_prog(id0):
     # print(id2)
     return id2
 
+# ****************************************************************************************************************************************
+
 def init_gen():
     possible_init = []
     for i in range(0,2**system_size):
@@ -55,6 +60,8 @@ def init_gen():
                 oracle_circ.x(i)
         circ_init_list.append(oracle_circ)
     return circ_init_list
+
+# ****************************************************************************************************************************************
 
 if __name__ == "__main__":
     print("\n****** Welcome to QCircScape! ******\n")
@@ -111,3 +118,4 @@ if __name__ == "__main__":
     
     print(AP)
         
+# ****************************************************************************************************************************************
