@@ -2,12 +2,14 @@ from itertools import permutations
 from qiskit import *
 from qiskit.quantum_info import Statevector
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # ****************************************************************************************************************************************
 
 # Global settings
 
-system_size = 3
+system_size = 4
 max_length = 3
 # gateset = ['h','t','cx']
 # gateqbts = {'h':1, 't':1, 'cx':2}
@@ -91,10 +93,11 @@ if __name__ == "__main__":
 
     init_circs = init_gen()     
 
-    AP = np.zeros((2**system_size, 2**system_size))
+    pathsum = np.zeros((2**system_size, 2**system_size))
 
     for icno, ic in enumerate(init_circs):
         for qid in range(qasm_id):
+            print(icno,qid)
             qprog = qasm_id_to_prog(qid)
             # print(qid,qprog)
             qcirc = QuantumCircuit(system_size)
@@ -121,13 +124,27 @@ if __name__ == "__main__":
             # print(memory)
             # exit()
             for j in range(0,len(memory)):
-                AP[icno][j] += memory[j]
-
-    print(AP)
+                pathsum[icno][j] += memory[j]
+    # print(pathsum)
+    
     gss = ''
     for g in gateset:
         gss += '-'+g
-    np.save(f'../data/info_Q-{system_size}_L-{max_length}_GS{gss}', AP)
-
         
+    opn_save = True
+    if opn_save:
+        np.save(f'../data/info_Q-{system_size}_L-{max_length}_GS{gss}', pathsum)
+    
+    opn_plot = True
+    if opn_plot:
+        pathprob = np.divide(pathsum,sum(pathsum[0]))
+        expressibility = 1*(pathsum != 0)
+        fig, axes = plt.subplots(1, 2, figsize=(10, 10), sharey=True, sharex=True, subplot_kw=dict(aspect='equal'))
+        sns.heatmap(expressibility, ax=axes[0], cmap = 'Greens', vmin=0.0, vmax=1.0, cbar = False, xticklabels = [], yticklabels = []) 
+        sns.heatmap(pathprob, ax=axes[1], cmap = 'Greens', vmin=0.0, vmax=1.0, cbar = False, xticklabels = [], yticklabels = [])
+        axes[0].set_title(f'Expressibility: Q-{system_size} L-{max_length} GS{gss}')
+        axes[1].set_title(f'Reachability: Q-{system_size} L-{max_length} GS{gss}')
+        plt.savefig(f'../data/plot_Q-{system_size}_L-{max_length}_GS{gss}.pdf')
+        plt.show()
+
 # ****************************************************************************************************************************************
