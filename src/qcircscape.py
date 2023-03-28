@@ -4,17 +4,19 @@ from qiskit.quantum_info import Statevector
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from cmath import pi
 
 # ****************************************************************************************************************************************
 
 # Global settings
 
-system_size = 3
-max_length = 4
-# gateset = ['h','t','cx']
-# gateqbts = {'h':1, 't':1, 'cx':2}
-gateset = ['x','ccx']
-gateqbts = {'x':1, 'ccx':3}
+gateset_db = {0:['x','ccx'], 1:['h','s','cx'], 2:['h','t','cx'], 3:['p(pi/4)', 'rx(pi/2)', 'cx']}
+
+system_size = 4             # Take as user input
+max_length = 3              # Take as user input
+gateset = gateset_db[3]     # Take as user input
+
+gateqbts = {'x':1, 'h':1, 't':1, 's':1, 'p(pi/4)':1, 'rx(pi/2)':1, 'cx':2, 'ccx':3}
 gateargs = {}
 gateperm = {}
 opcodes = 0   
@@ -72,9 +74,10 @@ if __name__ == "__main__":
     opn_save = False
     opn_plot = True
     opn_plot_save = False
+    show_progress = True
 
     if opn_plot:
-        fig, axes = plt.subplots(2, max_length, figsize=(10, 10), sharey=True, sharex=True, subplot_kw=dict(aspect='equal'))
+        fig, axes = plt.subplots(2, max_length+1, figsize=(10, 10), sharey=True, sharex=True, subplot_kw=dict(aspect='equal'))
 
     print("\n****** Welcome to QCircScape! ******\n")
 
@@ -100,15 +103,17 @@ if __name__ == "__main__":
 
     # for each max_length
 
-    for cd in range(max_length):
+    for cd in range(max_length+1):
         qasm_id = opcodes**cd
         print("Total possible circuits of length",cd,":",qasm_id)
     
         pathsum = np.zeros((2**system_size, 2**system_size))
         for icno, ic in enumerate(init_circs):
-            # print(icno)
+            if show_progress:
+                print(cd,icno)
             for qid in range(qasm_id):
-                # print(icno,qid)
+                if show_progress:
+                    print(cd,icno,qid)
                 qprog = qasm_id_to_prog(qid, cd)
                 # print(qid,qprog)
                 qcirc = QuantumCircuit(system_size)
@@ -117,14 +122,18 @@ if __name__ == "__main__":
                 qcirc = qcirc.compose(ic)
                 qcirc.barrier()
                 for ins in qprog:
-                    if ins[0] == 'h':
+                    if ins[0] == 'x':
+                        qcirc.x(ins[1])
+                    elif ins[0] == 'h':
                         qcirc.h(ins[1])
                     elif ins[0] == 't':
                         qcirc.t(ins[1])
                     elif ins[0] == 's':
                         qcirc.t(ins[1])
-                    elif ins[0] == 'x':
-                        qcirc.x(ins[1])
+                    elif ins[0] == 'p(pi/4)':
+                        qcirc.p(pi/4, ins[1])
+                    elif ins[0] == 'rx(pi/2)':
+                        qcirc.rx(pi, ins[1])
                     elif ins[0] == 'cx':
                         qcirc.cx(ins[1][0],ins[1][1])
                     elif ins[0] == 'ccx':
@@ -143,6 +152,7 @@ if __name__ == "__main__":
         gss = ''
         for g in gateset:
             gss += '-'+g
+        gss = gss[1:]
             
         opn_save = False
         if opn_save:
@@ -154,10 +164,11 @@ if __name__ == "__main__":
             # fig, axes = plt.subplots(2, 1, figsize=(10, 10), sharey=True, sharex=True, subplot_kw=dict(aspect='equal'))
             sns.heatmap(expressibility, ax=axes[0][cd], cmap = 'Greens', vmin=0.0, vmax=1.0, cbar = False, xticklabels = [], yticklabels = []) 
             sns.heatmap(pathprob, ax=axes[1][cd], cmap = 'Greens', vmin=0.0, vmax=1.0, cbar = False, xticklabels = [], yticklabels = [])
-            axes[0][cd].set_title(f'Expressibility: Q-{system_size} L-{cd} GS{gss}')
-            axes[1][cd].set_title(f'Reachability: Q-{system_size} L-{cd} GS{gss}')
+            axes[0][cd].set_title(f'Depth: {cd}')
+            # axes[1][cd].set_title(f'Reachability: Q-{system_size} Depth:{cd}')
     
-    if opn_plot:        
+    if opn_plot:
+        fig.suptitle(f'Expressibility (top row) and Reachability (bottom row) of z-basis states on {system_size} qubits using gate set {gss}')        
         if opn_plot_save:
             plt.savefig(f'../data/plot_Q-{system_size}_L-{cd}_GS{gss}.pdf')
         plt.show()
