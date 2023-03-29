@@ -12,20 +12,25 @@ all_pathsum = []
 all_pathprob = []
 all_expressibility = []
 for plen in range(1,max_length+1):
-    pathsum = np.load(f'../data/info_Q-{system_size}_L-{max_length}_GS{gss}'.npy)
+    pathsum = np.load(f'../data/info_Q-{system_size}_L-{plen}_GS{gss}.npy')
     all_pathsum.append(pathsum)
     all_pathprob.append(np.divide(pathsum,sum(pathsum[0])))
     all_expressibility.append(1*(pathsum != 0))
 
 predicted_pathprob = []
-Mi = all_pathprob[0]
+err_predicted_pathprob = []
+Mi = all_pathprob[0]   
 predicted_pathprob.append(Mi)
 for plen in range(1,max_length):
     Mi = Mi@all_pathprob[0]
     predicted_pathprob.append(Mi)
+    err_predicted_pathprob.append(np.around(np.subtract(all_pathprob[1],predicted_pathprob[1]),3) == 0)
+
+print(err_predicted_pathprob) 
 
 predicted_expressibility = []
 for plen in range(max_length):
     predicted_expressibility.append(1*(predicted_pathprob[plen] != 0))
+
 
 # Compare predicted/actual expressibility and reachability

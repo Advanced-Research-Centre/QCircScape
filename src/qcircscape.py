@@ -13,8 +13,8 @@ from cmath import pi
 gateset_db = {0:['x','ccx'], 1:['h','s','cx'], 2:['h','t','cx'], 3:['p(pi/4)', 'rx(pi/2)', 'cx']}
 
 system_size = 4             # Take as user input
-max_length = 3              # Take as user input
-gateset = gateset_db[3]     # Take as user input
+max_length = 2              # Take as user input
+gateset = gateset_db[0]     # Take as user input
 
 gateqbts = {'x':1, 'h':1, 't':1, 's':1, 'p(pi/4)':1, 'rx(pi/2)':1, 'cx':2, 'ccx':3}
 gateargs = {}
@@ -147,7 +147,7 @@ if __name__ == "__main__":
                 # exit()
                 for j in range(0,len(memory)):
                     pathsum[icno][j] += memory[j]
-        # print(pathsum)
+        print(pathsum)
         
         gss = ''
         for g in gateset:
