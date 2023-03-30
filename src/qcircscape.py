@@ -13,8 +13,9 @@ from cmath import pi
 gateset_db = {0:['x','ccx'], 1:['h','s','cx'], 2:['h','t','cx'], 3:['p(pi/4)', 'rx(pi/2)', 'cx']}
 
 system_size = 4             # Take as user input
-max_length = 2              # Take as user input
-gateset = gateset_db[0]     # Take as user input
+min_length = 0              # Take as user input
+max_length = 3              # Take as user input
+gateset = gateset_db[2]     # Take as user input
 
 gateqbts = {'x':1, 'h':1, 't':1, 's':1, 'p(pi/4)':1, 'rx(pi/2)':1, 'cx':2, 'ccx':3}
 gateargs = {}
@@ -71,13 +72,13 @@ def init_gen():
 
 if __name__ == "__main__":
 
-    opn_save = False
+    opn_save = True
     opn_plot = True
     opn_plot_save = False
     show_progress = True
 
     if opn_plot:
-        fig, axes = plt.subplots(2, max_length+1, figsize=(10, 10), sharey=True, sharex=True, subplot_kw=dict(aspect='equal'))
+        fig, axes = plt.subplots(2, max_length+1-min_length, figsize=(10, 10), sharey=True, sharex=True, subplot_kw=dict(aspect='equal'))
 
     print("\n****** Welcome to QCircScape! ******\n")
 
@@ -103,7 +104,7 @@ if __name__ == "__main__":
 
     # for each max_length
 
-    for cd in range(max_length+1):
+    for cd in range(min_length,max_length+1):
         qasm_id = opcodes**cd
         print("Total possible circuits of length",cd,":",qasm_id)
     
@@ -147,30 +148,28 @@ if __name__ == "__main__":
                 # exit()
                 for j in range(0,len(memory)):
                     pathsum[icno][j] += memory[j]
-        print(pathsum)
         
         gss = ''
         for g in gateset:
             gss += '-'+g
         gss = gss[1:]
             
-        opn_save = False
         if opn_save:
-            np.save(f'../data/info_Q-{system_size}_L-{cd}_GS{gss}', pathsum)
+            np.save(f'../data/info_Q-{system_size}_L-{cd}_GS-{gss}', pathsum)
         
         if opn_plot:
             pathprob = np.divide(pathsum,sum(pathsum[0]))
             expressibility = 1*(pathsum != 0)
             # fig, axes = plt.subplots(2, 1, figsize=(10, 10), sharey=True, sharex=True, subplot_kw=dict(aspect='equal'))
-            sns.heatmap(expressibility, ax=axes[0][cd], cmap = 'Greens', vmin=0.0, vmax=1.0, cbar = False, xticklabels = [], yticklabels = []) 
-            sns.heatmap(pathprob, ax=axes[1][cd], cmap = 'Greens', vmin=0.0, vmax=1.0, cbar = False, xticklabels = [], yticklabels = [])
-            axes[0][cd].set_title(f'Depth: {cd}')
+            sns.heatmap(expressibility, ax=axes[0][cd-min_length], cmap = 'Greens', vmin=0.0, vmax=1.0, cbar = False, xticklabels = [], yticklabels = []) 
+            sns.heatmap(pathprob, ax=axes[1][cd-min_length], cmap = 'Greens', vmin=0.0, vmax=1.0, cbar = False, xticklabels = [], yticklabels = [])
+            axes[0][cd-min_length].set_title(f'Depth: {cd}')
             # axes[1][cd].set_title(f'Reachability: Q-{system_size} Depth:{cd}')
     
     if opn_plot:
         fig.suptitle(f'Expressibility (top row) and Reachability (bottom row) of z-basis states on {system_size} qubits using gate set {gss}')        
         if opn_plot_save:
-            plt.savefig(f'../data/plot_Q-{system_size}_L-{cd}_GS{gss}.pdf')
+            plt.savefig(f'../data/plot_Q-{system_size}_L-{cd}_GS-{gss}.pdf')
         plt.show()
 
 # ****************************************************************************************************************************************
