@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from cmath import pi
+import networkx as nx
 
 # ****************************************************************************************************************************************
 
@@ -12,10 +13,10 @@ from cmath import pi
 
 gateset_db = {0:['x','ccx'], 1:['h','s','cx'], 2:['h','t','cx'], 3:['p(pi/4)', 'rx(pi/2)', 'cx']}
 
-system_size = 4             # Take as user input
+system_size = 5             # Take as user input
 min_length = 0              # Take as user input
 max_length = 3              # Take as user input
-gateset = gateset_db[2]     # Take as user input
+gateset = gateset_db[3]     # Take as user input
 
 gateqbts = {'x':1, 'h':1, 't':1, 's':1, 'p(pi/4)':1, 'rx(pi/2)':1, 'cx':2, 'ccx':3}
 gateargs = {}
@@ -53,6 +54,38 @@ def qasm_id_to_prog(id0, cd):
     # print(id2)
     return id2
 
+def make_opcodes():
+
+    global opcodes
+
+    # Create connectivity graph
+    device_topology = 'l'
+    if device_topology == 't':
+        edgelist = [(0,1), (1,2), (1,3), (3,4)]
+    elif device_topology == 'l':
+        edgelist = [(0,1), (1,2), (2,3), (3,4)]
+    elif device_topology == 'none':
+        edgelist = list(permutations(range(system_size),2))
+    G = nx.from_edgelist(edgelist)
+
+    for g in range(len(gateset)):
+        if gateqbts[gateset[g]] == 1:
+            perm = list(range(system_size)) # remains same
+        else:
+            perm_all = list(permutations(range(system_size),gateqbts[gateset[g]])) # for all n-qubit gates
+            perm = []
+            for mcg in perm_all:
+                if nx.is_path(G, mcg):
+                    perm.append(mcg)
+        gateargs[gateset[g]] = perm
+        gateperm[gateset[g]] = len(perm)
+        opcodes += len(perm)
+
+    # print("gateset:",gateset)
+    # print("gateqbts:",gateqbts)
+    # print("gateargs:",gateargs)
+    # print("gateperm:",gateperm)
+
 # ****************************************************************************************************************************************
 
 def init_gen():
@@ -72,7 +105,7 @@ def init_gen():
 
 if __name__ == "__main__":
 
-    opn_save = True
+    opn_save = False
     opn_plot = True
     opn_plot_save = False
     show_progress = True
@@ -87,29 +120,15 @@ if __name__ == "__main__":
     # Assume qubit ordering matters for all multi-qubit gates, i.e. cx[0,1], cx[1,0], cz[0,1], cz[1,0] are all unique
 
     init_circs = init_gen() 
+
+    make_opcodes()
     
-    # List options at each time step
-    for g in range(len(gateset)):
-        if gateqbts[gateset[g]] == 1:
-            perm = list(range(system_size))
-        else:
-            perm = list(permutations(range(system_size),gateqbts[gateset[g]])) 
-        gateargs[gateset[g]] = perm
-        gateperm[gateset[g]] = len(perm)
-        opcodes += len(perm)
-    # print("gateset:",gateset)
-    # print("gateqbts:",gateqbts)
-    print("gateargs:",gateargs)
-    # print("gateperm:",gateperm)
-
-    # for each max_length
-
     for cd in range(min_length,max_length+1):
         qasm_id = opcodes**cd
         print("Total possible circuits of length",cd,":",qasm_id)
     
         pathsum = np.zeros((2**system_size, 2**system_size))
-        for icno, ic in enumerate(init_circs):
+        for icno, ic in enumerate(init_circs):                  # Make into function
             if show_progress:
                 print(cd,icno)
             for qid in range(qasm_id):
@@ -161,8 +180,8 @@ if __name__ == "__main__":
             pathprob = np.divide(pathsum,sum(pathsum[0]))
             expressibility = 1*(pathsum != 0)
             # fig, axes = plt.subplots(2, 1, figsize=(10, 10), sharey=True, sharex=True, subplot_kw=dict(aspect='equal'))
-            sns.heatmap(expressibility, ax=axes[0][cd-min_length], cmap = 'Greens', vmin=0.0, vmax=1.0, cbar = False, xticklabels = [], yticklabels = []) 
-            sns.heatmap(pathprob, ax=axes[1][cd-min_length], cmap = 'Greens', vmin=0.0, vmax=1.0, cbar = False, xticklabels = [], yticklabels = [])
+            sns.heatmap(expressibility, ax=axes[0][cd-min_length], cmap = 'YlOrBr', vmin=0.0, vmax=1.0, cbar = False, xticklabels = [], yticklabels = []) 
+            sns.heatmap(pathprob, ax=axes[1][cd-min_length], cmap = 'YlOrBr', vmin=0.0, vmax=1.0, cbar = False, xticklabels = [], yticklabels = [])
             axes[0][cd-min_length].set_title(f'Depth: {cd}')
             # axes[1][cd].set_title(f'Reachability: Q-{system_size} Depth:{cd}')
     
