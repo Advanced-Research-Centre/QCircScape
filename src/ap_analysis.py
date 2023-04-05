@@ -5,7 +5,7 @@ import seaborn as sns
 system_size = 4
 max_length = 3
 
-gateset_db = {0:['x','ccx'], 1:['h','s','cx'], 2:['h','t','cx'], 3:['p(pi/4)', 'rx(pi/2)', 'cx']}
+gateset_db = {0:['x','ccx'], 1:['h','s','cx'], 2:['h','t','cx'], 3:['p', 'rx', 'cx']}
 gateset = gateset_db[0]
 
 gss = ''

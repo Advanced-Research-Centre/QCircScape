@@ -11,14 +11,15 @@ import networkx as nx
 
 # Global settings
 
-gateset_db = {0:['x','ccx'], 1:['h','s','cx'], 2:['h','t','cx'], 3:['p(pi/4)', 'rx(pi/2)', 'cx']}
+gateset_db = {0:['x','ccx'], 1:['h','s','cx'], 2:['h','t','cx'], 3:['p', 'rx', 'cx']}
 
 system_size = 5             # Take as user input
 min_length = 0              # Take as user input
 max_length = 3              # Take as user input
 gateset = gateset_db[3]     # Take as user input
+qb_connectivity = 't'       # Take as user input
 
-gateqbts = {'x':1, 'h':1, 't':1, 's':1, 'p(pi/4)':1, 'rx(pi/2)':1, 'cx':2, 'ccx':3}
+gateqbts = {'x':1, 'h':1, 't':1, 's':1, 'p':1, 'rx':1, 'cx':2, 'ccx':3}
 gateargs = {}
 gateperm = {}
 opcodes = 0   
@@ -59,12 +60,11 @@ def make_opcodes():
     global opcodes
 
     # Create connectivity graph
-    device_topology = 'l'
-    if device_topology == 't':
+    if qb_connectivity == 't':
         edgelist = [(0,1), (1,2), (1,3), (3,4)]
-    elif device_topology == 'l':
+    elif qb_connectivity == 'l':
         edgelist = [(0,1), (1,2), (2,3), (3,4)]
-    elif device_topology == 'none':
+    elif qb_connectivity == 'c':                    # Complete graph
         edgelist = list(permutations(range(system_size),2))
     G = nx.from_edgelist(edgelist)
 
@@ -105,7 +105,7 @@ def init_gen():
 
 if __name__ == "__main__":
 
-    opn_save = False
+    opn_save = True
     opn_plot = True
     opn_plot_save = False
     show_progress = True
@@ -150,9 +150,9 @@ if __name__ == "__main__":
                         qcirc.t(ins[1])
                     elif ins[0] == 's':
                         qcirc.t(ins[1])
-                    elif ins[0] == 'p(pi/4)':
+                    elif ins[0] == 'p':         # Denotes p(pi/4)
                         qcirc.p(pi/4, ins[1])
-                    elif ins[0] == 'rx(pi/2)':
+                    elif ins[0] == 'rx':  # Denotes rx(pi/2)
                         qcirc.rx(pi, ins[1])
                     elif ins[0] == 'cx':
                         qcirc.cx(ins[1][0],ins[1][1])
@@ -174,7 +174,7 @@ if __name__ == "__main__":
         gss = gss[1:]
             
         if opn_save:
-            np.save(f'../data/info_Q-{system_size}_L-{cd}_GS-{gss}', pathsum)
+            np.save(f'../data/info_Q-{system_size}_L-{cd}_GS-{gss}_CG-{qb_connectivity}', pathsum)
         
         if opn_plot:
             pathprob = np.divide(pathsum,sum(pathsum[0]))
