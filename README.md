@@ -1,15 +1,8 @@
 # QCircScape
 
-This research applies concepts from algorithmic probability to Boolean and quantum combinatorial logic circuits. Classical and quantum gate sets are compared to select some characteristic sets. The reachability and expressibility in a space-time-bounded setting for these gate sets are enumerated and visualized. These results are studied in terms of computational resources, universality and quantum behavior. 
+## Summary:
 
-## Gate sets:
-1. X, CCX
-2. H, S, CX
-3. H, T, CX
-4. P(pi/4), RX(pi/2), CX
-    - all-to-all topology
-    - L topology
-    - T topology
+This work applies concepts from algorithmic probability to Boolean and quantum combinatorial logic circuits. The relations among the statistical, algorithmic, computational and circuit complexities of states are reviewed. Thereafter, the probability of states in the circuit model of computation is defined. Classical and quantum gate sets are compared to select some characteristic sets. The reachability and expressibility in a space-time-bounded setting for these gate sets are enumerated and visualized. These results are studied in terms of computational resources, universality and quantum behavior. The article suggests how applications like geometric quantum machine learning, novel quantum algorithm synthesis and quantum artificial general intelligence can benefit by studying circuit probabilities.
 
 ## Collaborators:
 * Bao Gia Bach - Faculty of Computer Science and Engineering, Ho Chi Minh City University of Technology, Viet Nam
@@ -19,4 +12,4 @@ This research applies concepts from algorithmic probability to Boolean and quant
 
 ## Link to article:
 
-[Visualizing Quantum Circuit Probability - estimating computational action for quantum program synthesis]()
+[Visualizing Quantum Circuit Probability - estimating computational action for quantum program synthesis](https://arxiv.org/abs/2304.02358)
