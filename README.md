@@ -7,6 +7,7 @@ This work applies concepts from algorithmic probability to Boolean and quantum c
 ## Latest Version:
 
 [![DOI](https://zenodo.org/badge/487784260.svg)](https://zenodo.org/badge/latestdoi/487784260)
+
 version for MDPI Entropy article "Visualizing Quantum Circuit Probability - Estimating Quantum State Complexity for Quantum Program Synthesis"
 
 ## Collaborators:
